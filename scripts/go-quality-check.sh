@@ -64,6 +64,7 @@ Go project quality check script that runs:
 - Static analysis (go vet, staticcheck, golangci-lint)
 - Unit tests with coverage
 - Security scans (govulncheck, gosec, osv-scanner)
+- Cohesion analysis (LCOM4)
 - Module health checks
 
 OPTIONS:
@@ -266,6 +267,14 @@ if [ "$SKIP_SECURITY" != "true" ]; then
     fi
 else
     log_info "Skipping security scans"
+fi
+
+# 6. Cohesion analysis
+log_info "=== Cohesion Analysis ==="
+
+# LCOM4 - Lack of Cohesion of Methods
+if ! run_command "lcom4 ./..." "LCOM4 cohesion analysis"; then
+    log_warning "LCOM4 analysis failed (non-blocking)"
 fi
 
 # Summary
