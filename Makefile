@@ -1,4 +1,4 @@
-.PHONY: all help docker-build docker-quality docker-fmt docker-lint docker-test docker-coverage docker-sec docker-run
+.PHONY: all check help docker-build docker-pull docker-quality docker-fmt docker-lint docker-test docker-coverage docker-sec docker-run
 
 # Variables
 REGISTRY ?= ghcr.io
@@ -7,8 +7,14 @@ IMAGE_TAG ?= latest
 DOCKER_IMAGE ?= $(REGISTRY)/$(IMAGE_NAME):$(IMAGE_TAG)
 DOCKER_RUN := docker run --rm -v $(PWD):/work $(DOCKER_IMAGE)
 
-# Default target
-all: docker-quality
+# Default target - just run 'make' to check everything
+all: check
+
+# Main command - pull image and run all quality checks
+check: docker-pull
+	@echo "==> Go品質チェックを実行中..."
+	@$(DOCKER_RUN) make quality || (echo "\n❌ 品質チェックに失敗しました" && exit 1)
+	@echo "\n✅ 全ての品質チェックが完了しました！"
 
 # Help target
 help:
@@ -18,7 +24,7 @@ help:
 	@echo "  make <target>"
 	@echo ""
 	@echo "ターゲット:"
-	@echo "  all              - docker-qualityを実行（デフォルト）"
+	@echo "  all/check        - 全品質チェックを実行（デフォルト）"
 	@echo "  help             - このヘルプメッセージを表示"
 	@echo "  docker-build     - Dockerイメージをローカルビルド"
 	@echo "  docker-pull      - DockerイメージをGHCRからpull"
@@ -31,9 +37,11 @@ help:
 	@echo "  docker-run       - 任意のコマンドをDocker内で実行"
 	@echo ""
 	@echo "例:"
+	@echo "  make                 # 全品質チェックを一発実行（推奨）"
+	@echo "  make check           # 同上"
+	@echo "  make docker-fmt      # フォーマットのみ実行"
+	@echo "  make docker-test     # テストのみ実行"
 	@echo "  make docker-build    # イメージをローカルビルド"
-	@echo "  make docker-pull     # イメージをGHCRからpull"
-	@echo "  make docker-quality  # 全チェックを実行"
 	@echo "  make docker-run CMD='go mod tidy'  # 任意のコマンド実行"
 
 # Build Docker image locally

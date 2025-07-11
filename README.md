@@ -19,44 +19,35 @@ Go言語プロジェクトの品質を検査できるといいなという思い
 
 **注意**: Go言語のインストールは不要です。全てのツールはDockerイメージに含まれています。
 
-## 使い方
-
-### 1. Dockerイメージの取得
-
-#### GitHub Container Registryからpull（推奨）
+## クイックスタート
 
 ```bash
-# 公開イメージをpull
-docker pull ghcr.io/nakatatsu/goquality:latest
-
-# またはMakefileを使って
-make docker-pull
+# 全品質チェックを一発実行
+make
 ```
 
-#### ローカルビルド
+たったこれだけで、以下の全てが実行されます：
+- コードフォーマット
+- 静的解析  
+- テスト実行
+- カバレッジ測定
+- セキュリティスキャン
+
+## 詳細な使い方
+
+### Dockerイメージは自動でpullされます
 
 ```bash
-# Dockerイメージをローカルビルド
-docker build -t ghcr.io/nakatatsu/goquality:latest .
+# 基本コマンド
+make              # 全品質チェックを一発実行（推奨）
+make check        # 同上
 
-# またはMakefileを使って
-make docker-build
-```
-
-### 2. 品質チェックの実行
-
-#### Makefileを使う場合（推奨）
-
-```bash
-# 全ての品質チェックを実行
-make docker-quality
-
-# 個別のチェックを実行
-make docker-fmt        # コードフォーマット
-make docker-lint       # 静的解析
-make docker-test       # テスト実行
-make docker-coverage   # カバレッジ測定
-make docker-sec        # セキュリティスキャン
+# 個別のチェックを実行したい場合
+make docker-fmt        # コードフォーマットのみ
+make docker-lint       # 静的解析のみ
+make docker-test       # テストのみ
+make docker-coverage   # カバレッジ測定のみ
+make docker-sec        # セキュリティスキャンのみ
 ```
 
 #### Dockerコマンドを直接使う場合
@@ -73,20 +64,23 @@ docker run --rm -v $(pwd):/work ghcr.io/nakatatsu/goquality:latest make coverage
 docker run --rm -v $(pwd):/work ghcr.io/nakatatsu/goquality:latest make sec
 ```
 
-### 3. GitHub Actionsでの自動実行
+### GitHub Actionsでの自動実行
 
 リポジトリにpush/PRすると自動的に品質チェックが実行されます。GitHub ActionsもDockerイメージを使用するため、ローカルとCIで完全に同じ環境が保証されます。
 
 ## コマンド一覧
 
-| Makeコマンド | 説明 | Dockerコマンド |
-|-------------|------|---------------|
-| `make docker-quality` | 全ての品質チェックを実行 | `docker run --rm -v $(pwd):/work ghcr.io/nakatatsu/goquality:latest make quality` |
-| `make docker-fmt` | コードを整形 | `docker run --rm -v $(pwd):/work ghcr.io/nakatatsu/goquality:latest make fmt` |
-| `make docker-lint` | リンターを実行 | `docker run --rm -v $(pwd):/work ghcr.io/nakatatsu/goquality:latest make lint` |
-| `make docker-test` | テストを実行 | `docker run --rm -v $(pwd):/work ghcr.io/nakatatsu/goquality:latest make test` |
-| `make docker-coverage` | カバレッジを測定 | `docker run --rm -v $(pwd):/work ghcr.io/nakatatsu/goquality:latest make coverage` |
-| `make docker-sec` | セキュリティスキャン | `docker run --rm -v $(pwd):/work ghcr.io/nakatatsu/goquality:latest make sec` |
+| Makeコマンド | 説明 |
+|-------------|-----|
+| `make` | 全品質チェックを一発実行（デフォルト） |
+| `make check` | 同上 |
+| `make docker-fmt` | コードフォーマットのみ |
+| `make docker-lint` | 静的解析のみ |
+| `make docker-test` | テストのみ |
+| `make docker-coverage` | カバレッジ測定のみ |
+| `make docker-sec` | セキュリティスキャンのみ |
+| `make docker-build` | Dockerイメージをローカルビルド |
+| `make docker-pull` | Dockerイメージを更新 |
 
 ### 任意のコマンドを実行
 
