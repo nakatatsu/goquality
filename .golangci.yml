@@ -1,0 +1,248 @@
+run:
+  timeout: 5m
+  tests: true
+  build-tags:
+    - integration
+  skip-dirs:
+    - vendor
+    - third_party
+    - testdata
+  skip-files:
+    - ".*\\.pb\\.go$"
+    - ".*\\.gen\\.go$"
+    - "mock_.*\\.go$"
+
+output:
+  format: colored-line-number
+  print-issued-lines: true
+  print-linter-name: true
+
+linters:
+  enable:
+    - staticcheck
+    - gosimple
+    - unused
+    - govet
+    - errcheck
+    - ineffassign
+    - typecheck
+    - goimports
+    - gofmt
+    - gofumpt
+    - misspell
+    - unconvert
+    - dupl
+    - goconst
+    - gocyclo
+    - gocognit
+    - asciicheck
+    - bodyclose
+    - dogsled
+    - exportloopref
+    - funlen
+    - gocritic
+    - goprintffuncname
+    - gosec
+    - nakedret
+    - noctx
+    - nolintlint
+    - rowserrcheck
+    - stylecheck
+    - whitespace
+    - unparam
+    - revive
+    - prealloc
+    - predeclared
+    - nilerr
+    - nestif
+    - makezero
+    - lll
+    - importas
+    - ifshort
+    - gomoddirectives
+    - gomodguard
+    - godot
+    - exhaustive
+    - errorlint
+    - durationcheck
+    - cyclop
+    - containedctx
+    - bidichk
+    - asasalint
+  disable:
+    - maligned
+    - depguard
+    - golint
+    - interfacer
+    - scopelint
+    - gomnd
+    - wrapcheck
+    - testpackage
+    - paralleltest
+    - tparallel
+    - goerr113
+    - wsl
+    - nlreturn
+    - gochecknoinits
+    - gochecknoglobals
+    - godox
+    - forbidigo
+
+linters-settings:
+  staticcheck:
+    go: "1.24"
+    checks: ["all"]
+  
+  gosimple:
+    go: "1.24"
+  
+  unused:
+    go: "1.24"
+  
+  govet:
+    check-shadowing: true
+    enable-all: true
+  
+  errcheck:
+    check-type-assertions: true
+    check-blank: true
+  
+  gofumpt:
+    lang-version: "1.24"
+    extra-rules: true
+  
+  misspell:
+    locale: US
+  
+  dupl:
+    threshold: 150
+  
+  goconst:
+    min-len: 3
+    min-occurrences: 3
+  
+  gocyclo:
+    min-complexity: 15
+  
+  gocognit:
+    min-complexity: 20
+  
+  funlen:
+    lines: 100
+    statements: 50
+  
+  gocritic:
+    enabled-tags:
+      - diagnostic
+      - experimental
+      - opinionated
+      - performance
+      - style
+    disabled-checks:
+      - dupImport
+      - ifElseChain
+      - octalLiteral
+      - whyNoLint
+      - wrapperFunc
+  
+  gosec:
+    severity: medium
+    confidence: medium
+    excludes:
+      - G104
+      - G204
+  
+  nakedret:
+    max-func-lines: 30
+  
+  nolintlint:
+    allow-unused: false
+    allow-leading-space: false
+    require-explanation: true
+    require-specific: true
+  
+  revive:
+    confidence: 0.8
+    rules:
+      - name: blank-imports
+      - name: context-as-argument
+      - name: context-keys-type
+      - name: dot-imports
+      - name: error-return
+      - name: error-strings
+      - name: error-naming
+      - name: exported
+      - name: if-return
+      - name: increment-decrement
+      - name: var-naming
+      - name: var-declaration
+      - name: package-comments
+      - name: range
+      - name: receiver-naming
+      - name: time-naming
+      - name: unexported-return
+      - name: indent-error-flow
+      - name: errorf
+  
+  prealloc:
+    simple: true
+    range-loops: true
+    for-loops: true
+  
+  nestif:
+    min-complexity: 4
+  
+  lll:
+    line-length: 120
+    tab-width: 4
+  
+  godot:
+    scope: declarations
+    capital: true
+  
+  exhaustive:
+    default-signifies-exhaustive: true
+  
+  cyclop:
+    max-complexity: 15
+    package-average: 10.0
+    skip-tests: true
+
+issues:
+  exclude-rules:
+    - path: _test\.go
+      linters:
+        - dupl
+        - gosec
+        - funlen
+        - gocognit
+        - gocyclo
+        - errcheck
+        - lll
+    
+    - path: "(.*)?_gen\\.go"
+      linters:
+        - gocyclo
+        - errcheck
+        - dupl
+        - gosec
+        - goconst
+    
+    - path: "main\\.go"
+      linters:
+        - gocyclo
+        - errcheck
+        - dupl
+        - gosec
+    
+    - linters:
+        - staticcheck
+      text: "SA9003:"
+    
+    - linters:
+        - lll
+      source: "^//go:generate "
+  
+  max-issues-per-linter: 0
+  max-same-issues: 0
+  new: false
