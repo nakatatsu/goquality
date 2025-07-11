@@ -1,6 +1,8 @@
-# Go Quality Tools
+# Go Quality Tools（作成中）
 
 Go言語プロジェクトの品質検査
+
+※ まだ作成中
 
 ## 概要
 
