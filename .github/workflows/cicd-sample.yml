@@ -10,40 +10,13 @@ on:
 
 env:
   GO_VERSION: '1.24'
-  DOCKER_IMAGE: 'ghcr.io/${{ github.repository_owner }}/go-quality:1.24-${{ github.run_number }}'
+  DOCKER_IMAGE: 'ghcr.io/yourorg/go-quality:latest'
 
 jobs:
-  build-docker:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
-    steps:
-      - uses: actions/checkout@v4
-      
-      - name: Log in to GitHub Container Registry
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-      
-      - name: Build and push Docker image
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          push: true
-          tags: |
-            ${{ env.DOCKER_IMAGE }}
-            ghcr.io/${{ github.repository_owner }}/go-quality:latest
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
   format:
-    needs: build-docker
     runs-on: ubuntu-latest
     container:
-      image: ${{ needs.build-docker.outputs.docker-image || env.DOCKER_IMAGE }}
+      image: ${{ env.DOCKER_IMAGE }}
     steps:
       - uses: actions/checkout@v4
       
@@ -64,10 +37,9 @@ jobs:
           fi
 
   lint:
-    needs: build-docker
     runs-on: ubuntu-latest
     container:
-      image: ${{ needs.build-docker.outputs.docker-image || env.DOCKER_IMAGE }}
+      image: ${{ env.DOCKER_IMAGE }}
     steps:
       - uses: actions/checkout@v4
       
@@ -81,10 +53,9 @@ jobs:
         run: golangci-lint run --timeout=5m
 
   module-health:
-    needs: build-docker
     runs-on: ubuntu-latest
     container:
-      image: ${{ needs.build-docker.outputs.docker-image || env.DOCKER_IMAGE }}
+      image: ${{ env.DOCKER_IMAGE }}
     steps:
       - uses: actions/checkout@v4
       
@@ -101,10 +72,9 @@ jobs:
         run: go mod verify
 
   test:
-    needs: build-docker
     runs-on: ubuntu-latest
     container:
-      image: ${{ needs.build-docker.outputs.docker-image || env.DOCKER_IMAGE }}
+      image: ${{ env.DOCKER_IMAGE }}
     steps:
       - uses: actions/checkout@v4
       
@@ -141,10 +111,9 @@ jobs:
         continue-on-error: true
 
   benchmark:
-    needs: build-docker
     runs-on: ubuntu-latest
     container:
-      image: ${{ needs.build-docker.outputs.docker-image || env.DOCKER_IMAGE }}
+      image: ${{ env.DOCKER_IMAGE }}
     steps:
       - uses: actions/checkout@v4
       
@@ -159,10 +128,9 @@ jobs:
           path: benchmark.txt
 
   security:
-    needs: build-docker
     runs-on: ubuntu-latest
     container:
-      image: ${{ needs.build-docker.outputs.docker-image || env.DOCKER_IMAGE }}
+      image: ${{ env.DOCKER_IMAGE }}
     steps:
       - uses: actions/checkout@v4
       
@@ -190,10 +158,9 @@ jobs:
             osv-results.sarif
 
   license-check:
-    needs: build-docker
     runs-on: ubuntu-latest
     container:
-      image: ${{ needs.build-docker.outputs.docker-image || env.DOCKER_IMAGE }}
+      image: ${{ env.DOCKER_IMAGE }}
     steps:
       - uses: actions/checkout@v4
       
