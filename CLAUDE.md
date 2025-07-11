@@ -8,11 +8,12 @@ Go言語のクオリティの検査ワークフローを作ってもらおうと
 | -------------- | ----------------- | ------------------------------------------------------ | ------------------------------------ |
 | **整形・インポート整理** | コードの体裁統一          | `gofumpt -l -w ./…`, `goimports -l -w ./…`             | フォーマットが乱れていたらジョブ失敗にする                |
 | **静的解析（一般）**   | バグの芽を早期検知         | `go vet ./…`, `staticcheck ./…`                        | `golangci-lint` で複数 Linters を束ねる構成も可 |
+| **凝集度・設計品質**   | コードの設計品質測定        | `lcom4 ./…` (LCOM4メトリクス)                             | mainパッケージでは型エラーが発生する場合あり           |
 | **モジュール健全性**   | 依存と tidy の乖離検知    | `go mod tidy -v`, `go mod verify`                      | 差分が出たら失敗・PR へ diff をコメント             |
 | **ユニットテスト**    | 正常動作とカバレッジ確保      | `go test -race -coverprofile=cover.out ./…`            | 最低カバレッジ閾値（例: 80%）を設定                 |
 | **ファズテスト**     | 入力多様性によるクラッシュ検知   | `go test -fuzz=Fuzz -fuzztime=30s ./…`                 | Go 1.18 以上が前提                        |
 | **ベンチマーク**     | 性能回帰の検出           | `go test -bench=. -benchmem ./…`                       | 前回結果と比較し、閾値超えで警告                     |
-| **脆弱性スキャン**    | 既知脆弱性の混入防止        | `govulncheck ./…`, `gosec ./…`                         | 重大度高ならビルド失敗                          |
+| **脆弱性スキャン**    | 既知脆弱性の混入防止        | `govulncheck ./…`, `gosec ./…`, `osv-scanner`          | 重大度高ならビルド失敗                          |
 | **ライセンスチェック**  | OSS ライセンス違反の抑止    | `license-eye` など                                       | 非互換ライセンス検知でエラー                       |
 | **ビルドマトリクス**   | マルチ OS/Go バージョン検証 | `matrix: [1.22, 1.23, tip] × [linux, windows, darwin]` | macOS や Windows 固有バグの早期発見            |
 | **成果物・バッジ**    | 可視化と配布            | カバレッジ HTML、バイナリ圧縮                                      | アーティファクトとしてアップロード                    |
@@ -170,6 +171,50 @@ Docker イメージのビルドは **必ず `scripts/build-docker.sh` スクリ�
 ```
 
 このスクリプトは sudo docker コマンドを使用するため、Docker の権限が必要です。
+
+## 現在の実装状況
+
+### ✅ 実装済み機能
+
+**Dockerイメージ** (`ghcr.io/nakatatsu/goquality:latest`):
+- **Go 1.24**: 最新の安定版
+- **gofumpt v0.6.0**: コードフォーマッター
+- **goimports v0.20.0**: インポート整理
+- **staticcheck (latest)**: 静的解析
+- **golangci-lint v1.64.3**: 包括的リンター（Go 1.24対応版）
+- **govulncheck v1.1.1**: 脆弱性検査
+- **gosec v2.22.5**: セキュリティ監査（Go 1.24対応版）
+- **osv-scanner v1.7.0**: OSVデータベース脆弱性検査
+- **lcom4go (latest)**: LCOM4凝集度測定
+- **bc**: 数値計算用コマンド
+
+**統合スクリプト** (`go-quality-check`):
+1. **フォーマット検査**: gofumpt, goimports
+2. **静的解析**: go vet, staticcheck, golangci-lint  
+3. **モジュール健全性**: go mod tidy, go mod verify
+4. **テスト・カバレッジ**: 80%閾値、レースコンディション検出
+5. **セキュリティ**: govulncheck, gosec, osv-scanner
+6. **凝集度分析**: LCOM4メトリクス（mainパッケージは制限あり）
+
+### 🔄 動作確認済み
+
+- **個別コマンド**: 全ツールが正常動作
+- **統合チェック**: 7段階の品質検査が完全実行
+- **エラーハンドリング**: 透明性のある失敗報告
+- **非ブロッキング**: セキュリティとLCOM4失敗時も継続
+
+### ⚠️ 既知の制限
+
+**LCOM4について**:
+- mainパッケージで型システムエラーが発生する場合がある
+- サブパッケージ（`./pkg/...`, `./internal/...`）では正常動作
+- エラー時もスクリプト全体は継続実行（non-blocking）
+
+**回避策**:
+```bash
+# サブパッケージのみでLCOM4実行
+docker run --rm -v $(pwd):/work ghcr.io/nakatatsu/goquality:latest lcom4 ./pkg/...
+```
 
 [1]: https://hub.docker.com/_/golang?utm_source=chatgpt.com "golang - Official Image | Docker Hub"
 [2]: https://go.dev/doc/devel/release?utm_source=chatgpt.com "Release History - The Go Programming Language"

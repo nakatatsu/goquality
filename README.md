@@ -1,8 +1,6 @@
-# Go Quality Tools（作成中）
+# Go Quality Tools(α)
 
-Go言語プロジェクトの品質検査
-
-※ まだ作成中
+Go言語プロジェクトの包括的品質検査ツール(α版)
 
 ## 概要
 
@@ -11,8 +9,9 @@ Go言語プロジェクトの品質検査
 ### 含まれるツール
 
 - **フォーマッター**: gofumpt v0.6.0, goimports v0.20.0
-- **リンター**: staticcheck, golangci-lint v1.59.0, go vet
-- **セキュリティ**: govulncheck v1.1.1, gosec v2.18.2, osv-scanner v1.7.0
+- **リンター**: staticcheck, golangci-lint v1.64.3, go vet
+- **セキュリティ**: govulncheck v1.1.1, gosec v2.22.5, osv-scanner v1.7.0
+- **凝集度測定**: lcom4go (LCOM4メトリクス)
 - **ベース**: Go 1.24（Debian bookworm）
 
 ### 使い方
@@ -29,6 +28,7 @@ docker run --rm -v $(pwd):/work ghcr.io/nakatatsu/goquality:latest go-quality-ch
 - 静的解析（go vet, staticcheck, golangci-lint）
 - テスト実行とカバレッジ測定（80%閾値）
 - セキュリティスキャン（govulncheck, gosec, osv-scanner）
+- 凝集度分析（LCOM4メトリクス）
 - モジュール健全性チェック（go mod tidy, go mod verify）
 
 ### イメージ情報
@@ -96,4 +96,33 @@ docker run --rm -v $(pwd):/work ghcr.io/nakatatsu/goquality:latest go test -race
 # セキュリティスキャン
 docker run --rm -v $(pwd):/work ghcr.io/nakatatsu/goquality:latest govulncheck ./...
 docker run --rm -v $(pwd):/work ghcr.io/nakatatsu/goquality:latest gosec ./...
+
+# 凝集度分析
+docker run --rm -v $(pwd):/work ghcr.io/nakatatsu/goquality:latest lcom4 ./...
 ```
+
+## 品質検査の効果
+
+### 🚀 実際の改善効果
+
+このツールセットにより以下の問題を早期発見・修正できます：
+
+#### **バグの早期発見**
+- **go vet**: データ競合、nil参照、型エラーを検出
+- **staticcheck**: 無限ループ、未使用変数、論理エラーを発見  
+- **golangci-lint**: 100種類以上のバグパターンを自動検出
+
+#### **セキュリティリスクの排除**
+- **gosec**: SQLインジェクション、パストラバーサル、暗号化の脆弱性
+- **govulncheck**: 既知の脆弱性のある依存関係を検出
+- **osv-scanner**: サプライチェーン攻撃の防止
+
+#### **設計品質の向上**
+- **LCOM4**: 構造体の凝集度測定（値が低いほど良い設計）
+- **複雑度チェック**: 理解しにくいコードを発見
+- **テストカバレッジ**: 未テスト部分の可視化
+
+#### **保守性の確保**
+- **gofumpt/goimports**: チーム全体でコードスタイル統一
+- **非推奨API検出**: 将来のGo版での互換性問題を防止
+- **依存関係の健全性**: セキュリティパッチの適用状況確認
