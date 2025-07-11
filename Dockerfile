@@ -19,6 +19,8 @@ EOS
 
 # -------------------- stage: runtime --------------------
 FROM golang:1.24-bookworm AS runtime
+# 必要なシステムパッケージをインストール
+RUN apt-get update && apt-get install -y bc && rm -rf /var/lib/apt/lists/*
 # ツールバイナリだけコピーして極小化
 COPY --from=build-tools /go/bin /usr/local/bin
 
