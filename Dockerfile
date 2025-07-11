@@ -11,10 +11,10 @@ set -eu
 go install mvdan.cc/gofumpt@v0.6.0
 go install golang.org/x/tools/cmd/goimports@v0.20.0
 go install honnef.co/go/tools/cmd/staticcheck@latest
-go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.59.0
+go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.64.3
 go install github.com/google/osv-scanner/cmd/osv-scanner@v1.7.0
 go install golang.org/x/vuln/cmd/govulncheck@v1.1.1
-go install github.com/securego/gosec/v2/cmd/gosec@v2.18.2
+go install github.com/securego/gosec/v2/cmd/gosec@v2.22.5
 EOS
 
 # -------------------- stage: runtime --------------------

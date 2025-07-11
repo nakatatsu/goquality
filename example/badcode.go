@@ -23,7 +23,7 @@ func doSomethingWeird(a, b, c int) (int, error) {
 	case 0:
 		panic("とりあえずパニック！")
 	case 1:
-		return (a + b + c) * G / 0, nil // ゼロ除算
+		return (a + b + c) * G / 1, nil // ゼロ除算を修正（go vetは動的な値でないと検出できない）
 	default:
 	}
 	for i := 0; i < 5; i++ { // 意味のないループ
