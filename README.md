@@ -1,6 +1,6 @@
-# Go Quality Tools - Docker Image
+# Go Quality Tools
 
-Go言語プロジェクトの品質検査ツール群をパッケージしたDockerイメージを提供するリポジトリです。
+Go言語プロジェクトの品質検査
 
 ## 概要
 
@@ -13,23 +13,12 @@ Go言語プロジェクトの品質検査ツール群をパッケージしたDoc
 - **セキュリティ**: govulncheck v1.1.1, gosec v2.18.2, osv-scanner v1.7.0
 - **ベース**: Go 1.24（Debian bookworm）
 
-## Dockerイメージの使い方
-
-### イメージ情報
-
-- **レジストリ**: GitHub Container Registry (ghcr.io)
-- **イメージ名**: `ghcr.io/nakatatsu/goquality`
-- **利用可能タグ**:
-  - `latest`: mainブランチの最新版
-  - `develop`: developブランチの最新版
-  - `1.24-YYYYMMDD`: Goバージョンとビルド日付
-
-### 基本的な使い方
+### 使い方
 
 Goプロジェクトのルートディレクトリで以下のコマンドを実行：
 
 ```bash
-# 全ての品質チェックを一括実行（推奨）
+# 全ての品質チェックを一括実行
 docker run --rm -v $(pwd):/work ghcr.io/nakatatsu/goquality:latest go-quality-check
 ```
 
@@ -39,6 +28,15 @@ docker run --rm -v $(pwd):/work ghcr.io/nakatatsu/goquality:latest go-quality-ch
 - テスト実行とカバレッジ測定（80%閾値）
 - セキュリティスキャン（govulncheck, gosec, osv-scanner）
 - モジュール健全性チェック（go mod tidy, go mod verify）
+
+### イメージ情報
+
+- **レジストリ**: GitHub Container Registry (ghcr.io)
+- **イメージ名**: `ghcr.io/nakatatsu/goquality`
+- **利用可能タグ**:
+  - `latest`: mainブランチの最新版
+  - `develop`: developブランチの最新版
+  - `1.24-YYYYMMDD`: Goバージョンとビルド日付
 
 ### カスタマイズオプション
 
@@ -55,6 +53,26 @@ docker run --rm -v $(pwd):/work ghcr.io/nakatatsu/goquality:latest go-quality-ch
 # 詳細出力モード
 docker run --rm -v $(pwd):/work ghcr.io/nakatatsu/goquality:latest go-quality-check --verbose
 ```
+
+## 設定のカスタマイズ
+
+### golangci-lint設定
+
+プロジェクトルートに `.golangci.yml` を配置することで、リンターの設定をカスタマイズできます：
+
+```yaml
+linters-settings:
+  gocyclo:
+    min-complexity: 15
+  
+linters:
+  enable:
+    - gofmt
+    - golint
+    - govet
+    - staticcheck
+```
+
 
 ### 個別コマンド実行
 
@@ -77,85 +95,3 @@ docker run --rm -v $(pwd):/work ghcr.io/nakatatsu/goquality:latest go test -race
 docker run --rm -v $(pwd):/work ghcr.io/nakatatsu/goquality:latest govulncheck ./...
 docker run --rm -v $(pwd):/work ghcr.io/nakatatsu/goquality:latest gosec ./...
 ```
-
-### ワンライナーでの使用例
-
-```bash
-# コードフォーマット修正
-docker run --rm -v $(pwd):/work ghcr.io/nakatatsu/goquality:latest gofumpt -w .
-
-# インポート整理
-docker run --rm -v $(pwd):/work ghcr.io/nakatatsu/goquality:latest goimports -w .
-
-# 任意のGoコマンド実行
-docker run --rm -v $(pwd):/work ghcr.io/nakatatsu/goquality:latest go version
-```
-
-## GitHub Actionsでの利用
-
-CI/CDパイプラインでの使用例：
-
-```yaml
-jobs:
-  quality-check:
-    runs-on: ubuntu-latest
-    container:
-      image: ghcr.io/nakatatsu/goquality:latest
-    steps:
-      - uses: actions/checkout@v4
-      
-      - name: Format check
-        run: |
-          gofumpt -l -d .
-          goimports -l -d .
-      
-      - name: Lint
-        run: |
-          go vet ./...
-          staticcheck ./...
-          golangci-lint run
-      
-      - name: Test
-        run: go test -race -coverprofile=coverage.out ./...
-      
-      - name: Security scan
-        run: |
-          govulncheck ./...
-          gosec ./...
-```
-
-実際の例は `.github/workflows/cicd-sample.yml` を参照してください。
-
-
-## 設定のカスタマイズ
-
-### golangci-lint設定
-
-プロジェクトルートに `.golangci.yml` を配置することで、リンターの設定をカスタマイズできます：
-
-```yaml
-linters-settings:
-  gocyclo:
-    min-complexity: 15
-  
-linters:
-  enable:
-    - gofmt
-    - golint
-    - govet
-    - staticcheck
-```
-
-### 環境変数の利用
-
-```bash
-# カバレッジ閾値の設定
-docker run --rm -v $(pwd):/work -e COVERAGE_THRESHOLD=90 ghcr.io/nakatatsu/goquality:latest go test -coverprofile=coverage.out ./...
-```
-
-## CI/CDサンプル
-
-このリポジトリには以下のサンプルファイルが含まれています：
-
-- `.github/workflows/cicd-sample.yml`: GitHub Actionsでの品質チェックサンプル
-
