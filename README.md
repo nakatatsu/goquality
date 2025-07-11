@@ -29,6 +29,38 @@ Go言語プロジェクトの品質検査ツール群をパッケージしたDoc
 Goプロジェクトのルートディレクトリで以下のコマンドを実行：
 
 ```bash
+# 全ての品質チェックを一括実行（推奨）
+docker run --rm -v $(pwd):/work ghcr.io/nakatatsu/goquality:latest go-quality-check
+```
+
+これだけで以下の全ての検査が実行されます：
+- コードフォーマットチェック（gofumpt, goimports）
+- 静的解析（go vet, staticcheck, golangci-lint）
+- テスト実行とカバレッジ測定（80%閾値）
+- セキュリティスキャン（govulncheck, gosec, osv-scanner）
+- モジュール健全性チェック（go mod tidy, go mod verify）
+
+### カスタマイズオプション
+
+```bash
+# カバレッジ閾値を90%に設定
+docker run --rm -v $(pwd):/work -e COVERAGE_THRESHOLD=90 ghcr.io/nakatatsu/goquality:latest go-quality-check
+
+# セキュリティスキャンをスキップ
+docker run --rm -v $(pwd):/work ghcr.io/nakatatsu/goquality:latest go-quality-check --skip-security
+
+# テストをスキップしてフォーマットと静的解析のみ
+docker run --rm -v $(pwd):/work ghcr.io/nakatatsu/goquality:latest go-quality-check --skip-test
+
+# 詳細出力モード
+docker run --rm -v $(pwd):/work ghcr.io/nakatatsu/goquality:latest go-quality-check --verbose
+```
+
+### 個別コマンド実行
+
+必要に応じて個別のツールを実行することも可能です：
+
+```bash
 # コードフォーマットチェック
 docker run --rm -v $(pwd):/work ghcr.io/nakatatsu/goquality:latest gofumpt -l -d .
 docker run --rm -v $(pwd):/work ghcr.io/nakatatsu/goquality:latest goimports -l -d .
@@ -41,17 +73,9 @@ docker run --rm -v $(pwd):/work ghcr.io/nakatatsu/goquality:latest golangci-lint
 # テスト実行
 docker run --rm -v $(pwd):/work ghcr.io/nakatatsu/goquality:latest go test -race ./...
 
-# カバレッジ測定
-docker run --rm -v $(pwd):/work ghcr.io/nakatatsu/goquality:latest go test -race -coverprofile=coverage.out ./...
-
 # セキュリティスキャン
 docker run --rm -v $(pwd):/work ghcr.io/nakatatsu/goquality:latest govulncheck ./...
 docker run --rm -v $(pwd):/work ghcr.io/nakatatsu/goquality:latest gosec ./...
-docker run --rm -v $(pwd):/work ghcr.io/nakatatsu/goquality:latest osv-scanner .
-
-# モジュール健全性チェック
-docker run --rm -v $(pwd):/work ghcr.io/nakatatsu/goquality:latest go mod tidy -v
-docker run --rm -v $(pwd):/work ghcr.io/nakatatsu/goquality:latest go mod verify
 ```
 
 ### ワンライナーでの使用例

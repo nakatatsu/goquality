@@ -22,10 +22,14 @@ FROM golang:1.24-bookworm AS runtime
 # ツールバイナリだけコピーして極小化
 COPY --from=build-tools /go/bin /usr/local/bin
 
+# スクリプトをコピー
+COPY scripts/go-quality-check.sh /usr/local/bin/go-quality-check
+RUN chmod +x /usr/local/bin/go-quality-check
+
 # 共有キャッシュディレクトリを作り I/O を削減
 ENV GOMODCACHE=/go/pkg/mod \
     GOCACHE=/go/.cache
 
 WORKDIR /work
 ENTRYPOINT ["bash","-c"]
-CMD ["go version && echo 'Go Quality Tools - Run make quality or go test ...'"]
+CMD ["go version && echo 'Go Quality Tools - Run go-quality-check for full quality check'"]
