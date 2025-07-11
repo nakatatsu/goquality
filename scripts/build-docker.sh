@@ -31,7 +31,7 @@ print_warning() {
 
 # Function to check if Docker is running
 check_docker() {
-    if ! docker info >/dev/null 2>&1; then
+    if ! sudo docker info >/dev/null 2>&1; then
         print_error "Docker is not running or not installed"
         exit 1
     fi
@@ -41,7 +41,7 @@ check_docker() {
 build_image() {
     print_status "Building Docker image: ${FULL_IMAGE}"
     
-    if docker build -t "${FULL_IMAGE}" .; then
+    if sudo docker build -t "${FULL_IMAGE}" .; then
         print_status "Successfully built: ${FULL_IMAGE}"
     else
         print_error "Failed to build Docker image"
@@ -51,18 +51,18 @@ build_image() {
 
 # Function to tag additional versions
 tag_versions() {
-    local go_version=$(docker run --rm "${FULL_IMAGE}" go version | awk '{print $3}' | sed 's/go//')
+    local go_version=$(sudo docker run --rm "${FULL_IMAGE}" go version | awk '{print $3}' | sed 's/go//')
     local date_tag="${go_version}-$(date +%Y%m%d)"
     
     print_status "Tagging additional versions:"
     
     # Tag with Go version and date
-    docker tag "${FULL_IMAGE}" "${REGISTRY}/${IMAGE_NAME}:${date_tag}"
+    sudo docker tag "${FULL_IMAGE}" "${REGISTRY}/${IMAGE_NAME}:${date_tag}"
     echo "  - ${REGISTRY}/${IMAGE_NAME}:${date_tag}"
     
     # If building latest, also tag without registry for local use
     if [ "${IMAGE_TAG}" = "latest" ]; then
-        docker tag "${FULL_IMAGE}" "${IMAGE_NAME}:latest"
+        sudo docker tag "${FULL_IMAGE}" "${IMAGE_NAME}:latest"
         echo "  - ${IMAGE_NAME}:latest (local)"
     fi
 }
@@ -77,11 +77,11 @@ push_image() {
     print_status "Pushing images to ${REGISTRY}"
     
     # Get all tags for this image
-    local tags=$(docker images --format "{{.Repository}}:{{.Tag}}" | grep "^${REGISTRY}/${IMAGE_NAME}:")
+    local tags=$(sudo docker images --format "{{.Repository}}:{{.Tag}}" | grep "^${REGISTRY}/${IMAGE_NAME}:")
     
     for tag in $tags; do
         print_status "Pushing ${tag}"
-        if docker push "${tag}"; then
+        if sudo docker push "${tag}"; then
             echo "  ✓ Successfully pushed"
         else
             print_error "Failed to push ${tag}"
@@ -95,7 +95,7 @@ verify_image() {
     print_status "Verifying Docker image"
     
     # Test basic functionality
-    if docker run --rm "${FULL_IMAGE}" go version >/dev/null 2>&1; then
+    if sudo docker run --rm "${FULL_IMAGE}" go version >/dev/null 2>&1; then
         echo "  ✓ Go version check passed"
     else
         print_error "Go version check failed"
@@ -104,7 +104,7 @@ verify_image() {
     
     # List installed tools
     print_status "Installed tools:"
-    docker run --rm "${FULL_IMAGE}" sh -c '
+    sudo docker run --rm "${FULL_IMAGE}" sh -c '
         for tool in gofumpt goimports staticcheck golangci-lint govulncheck gosec osv-scanner; do
             if command -v $tool >/dev/null 2>&1; then
                 echo "  ✓ $tool: $(command -v $tool)"
@@ -218,13 +218,13 @@ main() {
     # Clean if requested
     if [ "${CLEAN}" = "true" ]; then
         print_status "Cleaning up dangling images"
-        docker image prune -f
+        sudo docker image prune -f
     fi
     
     print_status "Build complete!"
     echo ""
     echo "To use the image locally:"
-    echo "  docker run --rm -v \$(pwd):/work ${FULL_IMAGE} make quality"
+    echo "  sudo docker run --rm -v \$(pwd):/work ${FULL_IMAGE} make quality"
     echo ""
     echo "To use with Makefile:"
     echo "  make docker-quality"

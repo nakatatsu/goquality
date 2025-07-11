@@ -150,7 +150,26 @@ jobs:
 * multi-stage＋キャッシュでビルド時間・イメージサイズを抑制。
 * バージョンは *Go 本体とツールをピン留め* し、イメージの更新だけで品質ワークフロー全体を保守可能。
 
-これで毎回の Ansible インストール地獄から解放され、開発者も CI も “同一バイナリ” で品質検査を回せます。
+これで毎回の Ansible インストール地獄から解放され、開発者も CI も "同一バイナリ" で品質検査を回せます。
+
+---
+
+## Docker イメージのビルド
+
+Docker イメージのビルドは **必ず `scripts/build-docker.sh` スクリプトを使用すること**。
+
+```bash
+# 基本的なビルド
+./scripts/build-docker.sh
+
+# レジストリにプッシュ
+./scripts/build-docker.sh --push
+
+# カスタムタグでビルド
+./scripts/build-docker.sh --tag v1.0.0
+```
+
+このスクリプトは sudo docker コマンドを使用するため、Docker の権限が必要です。
 
 [1]: https://hub.docker.com/_/golang?utm_source=chatgpt.com "golang - Official Image | Docker Hub"
 [2]: https://go.dev/doc/devel/release?utm_source=chatgpt.com "Release History - The Go Programming Language"
