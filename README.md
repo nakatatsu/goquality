@@ -22,7 +22,7 @@ Goプロジェクトのルートディレクトリで以下のコマンドを実
 docker run --rm -v $(pwd):/work ghcr.io/nakatatsu/goquality:latest go-quality-check
 ```
 
-これだけで以下の全ての検査が実行されます：
+これで以下の全ての検査が実行されます：
 - コードフォーマットチェック（gofumpt, goimports）
 - 静的解析（go vet, staticcheck, golangci-lint）
 - テスト実行とカバレッジ測定（80%閾値）
