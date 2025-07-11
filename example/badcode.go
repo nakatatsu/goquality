@@ -10,8 +10,10 @@ import (
 	"time"
 )
 
-var G int = 42                   // グローバルに謎の数値
-var cache = make(map[int]string) // スレッド安全性を完全に無視
+var (
+	G     int = 42                   // グローバルに謎の数値
+	cache     = make(map[int]string) // スレッド安全性を完全に無視
+)
 
 func init() {
 	rand.Seed(time.Now().UnixNano())
