@@ -1,5 +1,8 @@
+# Go Quality Tools Docker Image
+# Registry: ghcr.io/nakatatsu/goquality
+#
 # -------------------- stage: build-tools --------------------
-FROM golang:1.24-bookworm AS build-tools  # 最新セキュリティパッチ適用版 :contentReference[oaicite:0]{index=0}
+FROM golang:1.24-bookworm AS build-tools
 RUN --mount=type=cache,target=/go/pkg/mod \
     --mount=type=cache,target=/root/.cache \
     <<'EOS'
@@ -25,4 +28,4 @@ ENV GOMODCACHE=/go/pkg/mod \
 
 WORKDIR /work
 ENTRYPOINT ["bash","-c"]
-CMD ["go version && echo 'Run make quality or go test …'"]
+CMD ["go version && echo 'Go Quality Tools - Run make quality or go test ...'"]

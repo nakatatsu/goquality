@@ -1,10 +1,10 @@
-# Go言語品質検査ワークフロー
+# Goコードの品質検査をしたいリポジトリ
 
-Go言語プロジェクトの品質を自動的に検査するためのDocker完全対応ワークフローです。
+Go言語プロジェクトの品質を検査できるといいなという思いの元で作られたリポジトリです
 
 ## 概要
 
-このリポジトリは、Go言語のコード品質を維持・向上させるための自動化ツール群をDockerイメージとして提供します。ローカル環境への依存ゼロで、以下の検査を実行できます：
+このリポジトリは、Go言語のコード品質を維持・向上させるための自動化ツール群をDockerイメージとして提供します。
 
 - コードフォーマット（gofumpt, goimports）
 - 静的解析（go vet, staticcheck, golangci-lint）
@@ -21,11 +21,26 @@ Go言語プロジェクトの品質を自動的に検査するためのDocker完
 
 ## 使い方
 
-### 1. Dockerイメージのビルド
+### 1. Dockerイメージの取得
+
+#### GitHub Container Registryからpull（推奨）
 
 ```bash
-# Dockerイメージをビルド
-docker build -t go-quality .
+# 公開イメージをpull
+docker pull ghcr.io/nakatatsu/goquality:latest
+
+# またはMakefileを使って
+make docker-pull
+```
+
+#### ローカルビルド
+
+```bash
+# Dockerイメージをローカルビルド
+docker build -t ghcr.io/nakatatsu/goquality:latest .
+
+# またはMakefileを使って
+make docker-build
 ```
 
 ### 2. 品質チェックの実行
@@ -48,14 +63,14 @@ make docker-sec        # セキュリティスキャン
 
 ```bash
 # 全ての品質チェックを実行
-docker run --rm -v $(pwd):/work go-quality make quality
+docker run --rm -v $(pwd):/work ghcr.io/nakatatsu/goquality:latest make quality
 
 # 個別のチェックを実行
-docker run --rm -v $(pwd):/work go-quality make fmt
-docker run --rm -v $(pwd):/work go-quality make lint
-docker run --rm -v $(pwd):/work go-quality make test
-docker run --rm -v $(pwd):/work go-quality make coverage
-docker run --rm -v $(pwd):/work go-quality make sec
+docker run --rm -v $(pwd):/work ghcr.io/nakatatsu/goquality:latest make fmt
+docker run --rm -v $(pwd):/work ghcr.io/nakatatsu/goquality:latest make lint
+docker run --rm -v $(pwd):/work ghcr.io/nakatatsu/goquality:latest make test
+docker run --rm -v $(pwd):/work ghcr.io/nakatatsu/goquality:latest make coverage
+docker run --rm -v $(pwd):/work ghcr.io/nakatatsu/goquality:latest make sec
 ```
 
 ### 3. GitHub Actionsでの自動実行
@@ -66,12 +81,12 @@ docker run --rm -v $(pwd):/work go-quality make sec
 
 | Makeコマンド | 説明 | Dockerコマンド |
 |-------------|------|---------------|
-| `make docker-quality` | 全ての品質チェックを実行 | `docker run --rm -v $(pwd):/work go-quality make quality` |
-| `make docker-fmt` | コードを整形 | `docker run --rm -v $(pwd):/work go-quality make fmt` |
-| `make docker-lint` | リンターを実行 | `docker run --rm -v $(pwd):/work go-quality make lint` |
-| `make docker-test` | テストを実行 | `docker run --rm -v $(pwd):/work go-quality make test` |
-| `make docker-coverage` | カバレッジを測定 | `docker run --rm -v $(pwd):/work go-quality make coverage` |
-| `make docker-sec` | セキュリティスキャン | `docker run --rm -v $(pwd):/work go-quality make sec` |
+| `make docker-quality` | 全ての品質チェックを実行 | `docker run --rm -v $(pwd):/work ghcr.io/nakatatsu/goquality:latest make quality` |
+| `make docker-fmt` | コードを整形 | `docker run --rm -v $(pwd):/work ghcr.io/nakatatsu/goquality:latest make fmt` |
+| `make docker-lint` | リンターを実行 | `docker run --rm -v $(pwd):/work ghcr.io/nakatatsu/goquality:latest make lint` |
+| `make docker-test` | テストを実行 | `docker run --rm -v $(pwd):/work ghcr.io/nakatatsu/goquality:latest make test` |
+| `make docker-coverage` | カバレッジを測定 | `docker run --rm -v $(pwd):/work ghcr.io/nakatatsu/goquality:latest make coverage` |
+| `make docker-sec` | セキュリティスキャン | `docker run --rm -v $(pwd):/work ghcr.io/nakatatsu/goquality:latest make sec` |
 
 ### 任意のコマンドを実行
 
@@ -80,7 +95,7 @@ docker run --rm -v $(pwd):/work go-quality make sec
 make docker-run CMD='go mod tidy'
 
 # または直接Dockerコマンドで
-docker run --rm -v $(pwd):/work go-quality go mod tidy
+docker run --rm -v $(pwd):/work ghcr.io/nakatatsu/goquality:latest go mod tidy
 ```
 
 ## 設定のカスタマイズ
@@ -95,12 +110,21 @@ docker run --rm -v $(pwd):/work go-quality go mod tidy
 
 ```bash
 # 環境変数で一時的に変更
-docker run --rm -v $(pwd):/work -e COVERAGE_THRESHOLD=90 go-quality make coverage
+docker run --rm -v $(pwd):/work -e COVERAGE_THRESHOLD=90 ghcr.io/nakatatsu/goquality:latest make coverage
 ```
 
 ## Dockerイメージの詳細
 
-イメージには以下のツールが含まれています：
+### イメージ情報
+
+- **レジストリ**: GitHub Container Registry (ghcr.io)
+- **イメージ名**: `ghcr.io/nakatatsu/goquality`
+- **利用可能タグ**:
+  - `latest`: 最新安定版
+  - `1.24-YYYYMMDD`: Goバージョンとビルド日付
+  - `vX.Y.Z`: セマンティックバージョニング
+
+### 含まれるツール
 
 - **フォーマッター**: gofumpt v0.6.0, goimports v0.20.0
 - **リンター**: staticcheck v0.5.5, golangci-lint v1.59.0
@@ -109,37 +133,51 @@ docker run --rm -v $(pwd):/work -e COVERAGE_THRESHOLD=90 go-quality make coverag
 
 ## トラブルシューティング
 
-### Dockerイメージのビルドが失敗する
+### Dockerイメージのpullが失敗する
+
+```bash
+# ネットワーク接続を確認して再試行
+docker pull ghcr.io/nakatatsu/goquality:latest
+```
+
+### ローカルビルドが失敗する
 
 ```bash
 # キャッシュをクリアして再ビルド
-docker build --no-cache -t go-quality .
+docker build --no-cache -t ghcr.io/nakatatsu/goquality:latest .
 ```
 
 ### 権限エラーが発生する
 
 ```bash
 # ユーザーIDを指定して実行
-docker run --rm -v $(pwd):/work --user $(id -u):$(id -g) go-quality make quality
+docker run --rm -v $(pwd):/work --user $(id -u):$(id -g) ghcr.io/nakatatsu/goquality:latest make quality
 ```
 
 ### Windows環境での実行
 
 PowerShellの場合：
 ```powershell
-docker run --rm -v ${PWD}:/work go-quality make quality
+docker run --rm -v ${PWD}:/work ghcr.io/nakatatsu/goquality:latest make quality
 ```
 
 ## CI/CDパイプラインでの利用
 
-GitHub Actionsを使用する場合、`.github/workflows/go-quality.yml` が自動的にDockerイメージをビルドして使用します。プロジェクトごとの設定は不要です。
+GitHub Actionsを使用する場合、`.github/workflows/docker-build.yml` が自動的にDockerイメージをビルドしてGitHub Container Registryにプッシュします。
+
+### 自動ビルドタイミング
+
+- mainブランチへのpush時
+- Pull Request作成時
+- 毎日00:00 UTC（nightlyビルド）
+- タグ付け時（v*）
 
 ## バッジの追加
 
 READMEにステータスバッジを追加：
 
 ```bash
-docker run --rm -v $(pwd):/work go-quality ./scripts/add-badges.sh [owner/repo]
+docker run --rm -v $(pwd):/work ghcr.io/nakatatsu/goquality:latest ./scripts/add-badges.sh [owner/repo]
 ```
 
 ## ライセンス

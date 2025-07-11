@@ -1,7 +1,10 @@
 .PHONY: all help docker-build docker-quality docker-fmt docker-lint docker-test docker-coverage docker-sec docker-run
 
 # Variables
-DOCKER_IMAGE ?= go-quality
+REGISTRY ?= ghcr.io
+IMAGE_NAME ?= nakatatsu/goquality
+IMAGE_TAG ?= latest
+DOCKER_IMAGE ?= $(REGISTRY)/$(IMAGE_NAME):$(IMAGE_TAG)
 DOCKER_RUN := docker run --rm -v $(PWD):/work $(DOCKER_IMAGE)
 
 # Default target
@@ -17,7 +20,8 @@ help:
 	@echo "ターゲット:"
 	@echo "  all              - docker-qualityを実行（デフォルト）"
 	@echo "  help             - このヘルプメッセージを表示"
-	@echo "  docker-build     - Dockerイメージをビルド"
+	@echo "  docker-build     - Dockerイメージをローカルビルド"
+	@echo "  docker-pull      - DockerイメージをGHCRからpull"
 	@echo "  docker-quality   - 全ての品質チェックを実行"
 	@echo "  docker-fmt       - コードフォーマット"
 	@echo "  docker-lint      - リンターを実行"
@@ -27,48 +31,55 @@ help:
 	@echo "  docker-run       - 任意のコマンドをDocker内で実行"
 	@echo ""
 	@echo "例:"
-	@echo "  make docker-build    # イメージをビルド"
+	@echo "  make docker-build    # イメージをローカルビルド"
+	@echo "  make docker-pull     # イメージをGHCRからpull"
 	@echo "  make docker-quality  # 全チェックを実行"
 	@echo "  make docker-run CMD='go mod tidy'  # 任意のコマンド実行"
 
-# Build Docker image
+# Build Docker image locally
 docker-build:
 	@echo "==> Dockerイメージをビルド中..."
 	@docker build -t $(DOCKER_IMAGE) .
 	@echo "✓ Dockerイメージのビルドが完了: $(DOCKER_IMAGE)"
 
+# Pull Docker image from GitHub Container Registry
+docker-pull:
+	@echo "==> GitHub Container Registryからイメージをpull中..."
+	@docker pull $(DOCKER_IMAGE)
+	@echo "✓ Dockerイメージのpullが完了: $(DOCKER_IMAGE)"
+
 # Run all quality checks
-docker-quality: docker-build
+docker-quality: docker-pull
 	@echo "==> Docker内で全品質チェックを実行..."
 	@$(DOCKER_RUN) make quality
 
 # Format code
-docker-fmt: docker-build
+docker-fmt: docker-pull
 	@echo "==> Docker内でコードフォーマットを実行..."
 	@$(DOCKER_RUN) make fmt
 
 # Run linters
-docker-lint: docker-build
+docker-lint: docker-pull
 	@echo "==> Docker内でリンターを実行..."
 	@$(DOCKER_RUN) make lint
 
 # Run tests
-docker-test: docker-build
+docker-test: docker-pull
 	@echo "==> Docker内でテストを実行..."
 	@$(DOCKER_RUN) make test
 
 # Run coverage
-docker-coverage: docker-build
+docker-coverage: docker-pull
 	@echo "==> Docker内でカバレッジ測定を実行..."
 	@$(DOCKER_RUN) make coverage
 
 # Run security scans
-docker-sec: docker-build
+docker-sec: docker-pull
 	@echo "==> Docker内でセキュリティスキャンを実行..."
 	@$(DOCKER_RUN) make sec
 
 # Run arbitrary command in Docker
-docker-run: docker-build
+docker-run: docker-pull
 	@if [ -z "$(CMD)" ]; then \
 		echo "使い方: make docker-run CMD='<コマンド>'"; \
 		echo "例: make docker-run CMD='go mod tidy'"; \
