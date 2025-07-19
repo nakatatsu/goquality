@@ -75,7 +75,7 @@ ENV GOMODCACHE=/go/pkg/mod \
 
 WORKDIR /work
 ENTRYPOINT ["bash","-c"]
-CMD ["go version && echo 'Run make quality or go test …'"]
+CMD ["go version && echo 'Run make quality …'"]
 ```
 
 **ポイント**

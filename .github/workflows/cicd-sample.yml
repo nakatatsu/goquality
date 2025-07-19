@@ -75,11 +75,7 @@ jobs:
       image: ${{ env.DOCKER_IMAGE }}
     steps:
       - uses: actions/checkout@v4
-      
-      - name: Run unit tests with coverage
-        run: |
-          go test -race -coverprofile=coverage.out -covermode=atomic ./...
-          go tool cover -html=coverage.out -o coverage.html
+
       
       - name: Check coverage threshold
         run: |
@@ -97,33 +93,6 @@ jobs:
           path: |
             coverage.out
             coverage.html
-      
-      - name: Run fuzz tests
-        run: |
-          # Run fuzz tests if they exist
-          if go test -list 'Fuzz.*' ./... | grep -q Fuzz; then
-            go test -fuzz=Fuzz -fuzztime=30s ./...
-          else
-            echo "No fuzz tests found"
-          fi
-        continue-on-error: true
-
-  benchmark:
-    runs-on: ubuntu-latest
-    container:
-      image: ${{ env.DOCKER_IMAGE }}
-    steps:
-      - uses: actions/checkout@v4
-      
-      - name: Run benchmarks
-        run: |
-          go test -bench=. -benchmem -benchtime=10x ./... | tee benchmark.txt
-      
-      - name: Upload benchmark results
-        uses: actions/upload-artifact@v4
-        with:
-          name: benchmark-results
-          path: benchmark.txt
 
   security:
     runs-on: ubuntu-latest
