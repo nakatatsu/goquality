@@ -26,9 +26,6 @@ env:
   # GitHub Container Registry settings
   GHCR_REGISTRY: ghcr.io
   GHCR_IMAGE_NAME: nakatatsu/goquality
-  # Docker Hub settings
-  DOCKERHUB_REGISTRY: docker.io
-  DOCKERHUB_IMAGE_NAME: tnakamura2025/goquality
   # Dynamic tag based on branch
   IMAGE_TAG: ${{ github.ref == 'refs/heads/main' && 'latest' || (github.ref == 'refs/heads/develop' && 'develop' || github.ref_name) }}
 
@@ -52,13 +49,6 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       
-      - name: Log in to Docker Hub
-        if: (github.event_name != 'pull_request' || github.event.inputs.push == 'true') && vars.DOCKERHUB_USERNAME != ''
-        uses: docker/login-action@v3
-        with:
-          username: ${{ vars.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-      
       - name: Extract metadata for GHCR
         id: meta-ghcr
         uses: docker/metadata-action@v5
@@ -69,25 +59,8 @@ jobs:
             type=ref,event=pr
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
-            type=raw,value=latest,enable={{is_default_branch}}
+            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
             type=raw,value=develop,enable=${{ github.ref == 'refs/heads/develop' }}
-            type=raw,value=1.24-{{date 'YYYYMMDD'}},enable={{is_default_branch}}
-            type=raw,value=1.24-develop-{{date 'YYYYMMDD'}},enable=${{ github.ref == 'refs/heads/develop' }}
-      
-      - name: Extract metadata for Docker Hub
-        id: meta-dockerhub
-        if: vars.DOCKERHUB_USERNAME != ''
-        uses: docker/metadata-action@v5
-        with:
-          images: ${{ env.DOCKERHUB_IMAGE_NAME }}
-          tags: |
-            type=ref,event=branch
-            type=ref,event=pr
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
-            type=raw,value=latest,enable={{is_default_branch}}
-            type=raw,value=develop,enable=${{ github.ref == 'refs/heads/develop' }}
-            type=raw,value={{date 'YYYYMMDD'}},enable={{is_default_branch}}
             type=raw,value=1.24-{{date 'YYYYMMDD'}},enable={{is_default_branch}}
             type=raw,value=1.24-develop-{{date 'YYYYMMDD'}},enable=${{ github.ref == 'refs/heads/develop' }}
       
@@ -99,9 +72,7 @@ jobs:
         with:
           context: .
           push: ${{ github.event_name != 'pull_request' || github.event.inputs.push == 'true' }}
-          tags: |
-            ${{ steps.meta-ghcr.outputs.tags }}
-            ${{ steps.meta-dockerhub.outputs.tags }}
+          tags: ${{ steps.meta-ghcr.outputs.tags }}
           labels: ${{ steps.meta-ghcr.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
@@ -125,18 +96,6 @@ jobs:
           echo '```bash' >> $GITHUB_STEP_SUMMARY
           echo "docker pull ${{ env.GHCR_REGISTRY }}/${{ env.GHCR_IMAGE_NAME }}:${{ env.IMAGE_TAG }}" >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
-          
-          if [ -n "${{ vars.DOCKERHUB_USERNAME }}" ]; then
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "### Docker Hub" >> $GITHUB_STEP_SUMMARY
-            echo "**Image:** ${{ env.DOCKERHUB_IMAGE_NAME }}" >> $GITHUB_STEP_SUMMARY
-            echo "**Tag:** ${{ env.IMAGE_TAG }}" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "**Pull command:**" >> $GITHUB_STEP_SUMMARY
-            echo '```bash' >> $GITHUB_STEP_SUMMARY
-            echo "docker pull ${{ env.DOCKERHUB_IMAGE_NAME }}:${{ env.IMAGE_TAG }}" >> $GITHUB_STEP_SUMMARY
-            echo '```' >> $GITHUB_STEP_SUMMARY
-          fi
       
       - name: Run vulnerability scan
         if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
