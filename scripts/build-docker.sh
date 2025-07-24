@@ -68,11 +68,6 @@ tag_versions() {
 
 # Function to push to registry
 push_image() {
-    if [ "${PUSH:-false}" != "true" ]; then
-        print_warning "Skipping push (set PUSH=true to push to registry)"
-        return
-    fi
-    
     print_status "Pushing images to ${REGISTRY}"
     
     # Get all tags for this image
@@ -138,7 +133,6 @@ ENVIRONMENT VARIABLES:
     REGISTRY      Registry URL (default: ghcr.io)
     IMAGE_NAME    Image name (default: nakatatsu/goquality)
     IMAGE_TAG     Image tag (default: latest)
-    PUSH          Set to 'true' to push to registry
 
 EOF
 }
@@ -151,10 +145,6 @@ while [[ $# -gt 0 ]]; do
         -h|--help)
             usage
             exit 0
-            ;;
-        -p|--push)
-            PUSH=true
-            shift
             ;;
         -t|--tag)
             IMAGE_TAG="$2"
