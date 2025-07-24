@@ -41,3 +41,7 @@ COPY scripts/go-quality-check.sh /usr/local/bin/go-quality-check
 RUN chmod +x /usr/local/bin/go-quality-check
 
 WORKDIR /workspaces
+
+# Devcontainer用: コンテナを起動したままにする
+# docker-compose.ymlのcommandで上書きされるが、デフォルトを設定
+CMD ["sleep", "infinity"]
