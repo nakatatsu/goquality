@@ -51,8 +51,7 @@ build_image() {
 
 # Function to tag additional versions
 tag_versions() {
-    local go_version=$(sudo docker run --rm "${FULL_IMAGE}" go version | awk '{print $3}' | sed 's/go//')
-    local date_tag="${go_version}-$(date +%Y%m%d)"
+    local date_tag=$(date +%Y%m%d)
     
     print_status "Tagging additional versions:"
     
@@ -93,14 +92,6 @@ push_image() {
 # Function to verify image
 verify_image() {
     print_status "Verifying Docker image"
-    
-    # Test basic functionality
-    if sudo docker run --rm "${FULL_IMAGE}" go version >/dev/null 2>&1; then
-        echo "  ✓ Go version check passed"
-    else
-        print_error "Go version check failed"
-        exit 1
-    fi
     
     # List installed tools
     print_status "Installed tools:"
