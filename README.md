@@ -1,18 +1,20 @@
 # Go Quality Tools(α)
 
-Go言語プロジェクトの包括的品質検査ツール(α版)
+Go言語プロジェクトの品質検査ツール全部入りのコンテナ作成(α版)
 
 ## 概要
 
-このリポジトリは、Go言語のコード品質を維持・向上させるための自動化ツール群をDockerイメージとして提供します。CI/CDパイプラインやローカル開発環境で統一された品質検査環境を利用できます。
+- このリポジトリは、Go言語のコード品質を維持・向上させるためのツール群をDockerイメージとして提供します。
+- そのままdevcontainerとしても利用できるようにします。
+- 
 
 ### 含まれるツール
 
-- **フォーマッター**: gofumpt v0.6.0, goimports v0.20.0
-- **リンター**: staticcheck, golangci-lint v1.64.3, go vet
-- **セキュリティ**: govulncheck v1.1.1, gosec v2.22.5, osv-scanner v1.7.0
+- **フォーマッター**: gofumpt, goimports(単体で扱いたいため golangci-lint とは別に導入)
+- **リンター・静的解析**: golangci-lint 
+- **セキュリティ**: govulncheck, gosec, osv-scanner
 - **凝集度測定**: lcom4go (LCOM4メトリクス)
-- **ベース**: Go 1.24（Debian bookworm）
+- **Go**: Go
 
 ### 使い方
 

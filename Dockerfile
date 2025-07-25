@@ -23,14 +23,14 @@ RUN --mount=type=cache,target=/go/pkg/mod \
     --mount=type=cache,target=/root/.cache \
     <<'EOS'
 set -eu
-go install mvdan.cc/gofumpt@v0.6.0
-go install golang.org/x/tools/cmd/goimports@v0.20.0
-go install honnef.co/go/tools/cmd/staticcheck@latest
-go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.64.3
-go install github.com/google/osv-scanner/cmd/osv-scanner@v1.7.0
-go install golang.org/x/vuln/cmd/govulncheck@v1.1.1
-go install github.com/securego/gosec/v2/cmd/gosec@v2.22.5
-go install github.com/yahoojapan/lcom4go/cmd/lcom4@latest
+go install mvdan.cc/gofumpt@v0.8.0
+go install golang.org/x/tools/cmd/goimports@v0.35.0
+go install honnef.co/go/tools/cmd/staticcheck@v0.6.1
+go install github.com/golangci/golangci-lint/cmd/golangci-lint@v2.3.0
+go install github.com/google/osv-scanner/cmd/osv-scanner@v2.1.0
+go install golang.org/x/vuln/cmd/govulncheck@v1.1.4
+go install github.com/securego/gosec/v2/cmd/gosec@v2.22.7
+go install github.com/yahoojapan/lcom4go/cmd/lcom4@v0.0.3
 EOS
 
 # ツールをPATHに追加
